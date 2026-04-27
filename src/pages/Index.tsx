@@ -6,11 +6,11 @@ const LUNTIK_IMG = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587
 const MUSIC_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
 
 const SHOP_ITEMS = [
-  { id: "kastrul",  name: "Кастрюля",      price: 50,  emoji: "🪣", desc: "кастрюля." },
-  { id: "multivar", name: "Мультиварка",   price: 125, emoji: "🍲", desc: "очень полезная в готовке" },
-  { id: "nozh",     name: "Нож",           price: 175, emoji: "🔪", desc: "очень опасен не только в нападении, но и при резке чего либо" },
-  { id: "tv",       name: "Телевизор",     price: 275, emoji: "📺", desc: "всегда весело посмотреть телевизор вечером!" },
-  { id: "ruchka",   name: "Ручка Вспыша", price: 666, emoji: "✒️", desc: "ЭКСКЛЮЗИВ!" },
+  { id: "kastrul",  name: "Кастрюля",      price: 50,  emoji: "🪣", desc: "кастрюля.",                                                           achiev: { title: "Это не ведро!",         desc: "купи кастрюлю" } },
+  { id: "multivar", name: "Мультиварка",   price: 125, emoji: "🍲", desc: "очень полезная в готовке",                                            achiev: { title: "сам варить не умеешь?", desc: "купи мультиварку" } },
+  { id: "nozh",     name: "Нож",           price: 175, emoji: "🔪", desc: "очень опасен не только в нападении, но и при резке чего либо",        achiev: { title: "ты осторожней будь!",   desc: "купи нож" } },
+  { id: "tv",       name: "Телевизор",     price: 275, emoji: "📺", desc: "всегда весело посмотреть телевизор вечером!",                         achiev: { title: "любишь залипать?",      desc: "купи телек" } },
+  { id: "ruchka",   name: "Ручка Вспыша", price: 666, emoji: "✒️", desc: "ЭКСКЛЮЗИВ!",                                                          achiev: { title: "И ЧУДО МАШИНКИ!",       desc: "купи ручку вспыша" } },
 ];
 
 const UPGRADES = [
@@ -41,6 +41,7 @@ export default function Index() {
   const [music, setMusic] = useState(true);
   const [clickAnim, setClickAnim] = useState(false);
   const [plusAnims, setPlusAnims] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [achievToast, setAchievToast] = useState<{ title: string; desc: string } | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animIdRef = useRef(0);
 
@@ -97,6 +98,11 @@ export default function Index() {
     if (purchased.includes(itemId) || coins < price) return;
     setCoins((c) => c - price);
     setPurchased((p) => [...p, itemId]);
+    const item = SHOP_ITEMS.find((i) => i.id === itemId);
+    if (item) {
+      setAchievToast(item.achiev);
+      setTimeout(() => setAchievToast(null), 3500);
+    }
   };
 
   const char = getCharacter(charClicks);
@@ -123,6 +129,17 @@ export default function Index() {
       <div style={{ position: "fixed", top: "1rem", right: "1rem", zIndex: 200 }}>
         <span className="coin-badge">🪙 {coins.toLocaleString()}</span>
       </div>
+
+      {/* Achievement toast */}
+      {achievToast && (
+        <div className="achiev-toast">
+          <span className="achiev-icon">🏆</span>
+          <div>
+            <div className="achiev-t">Ачивка: {achievToast.title}</div>
+            <div className="achiev-d">{achievToast.desc}</div>
+          </div>
+        </div>
+      )}
 
       <div className="pc">
         {/* Main menu */}
@@ -374,6 +391,24 @@ export default function Index() {
         .toggle-btn.on  { background:#2a5a2a; color:#44ff44; border-color:#44ff44; }
         .toggle-btn.off { background:#5a1a1a; color:#ff6666; border-color:#ff6666; }
         .toggle-btn:hover { transform:scale(1.06); }
+
+        .achiev-toast {
+          position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%);
+          background:linear-gradient(135deg,#3a2a00,#6a4e00);
+          border:2.5px solid #f5c518; border-radius:18px;
+          padding:.9rem 1.4rem; display:flex; align-items:center; gap:.9rem;
+          z-index:300; box-shadow:0 8px 30px rgba(245,197,24,.4);
+          animation:toastIn .4s cubic-bezier(.34,1.56,.64,1) both;
+          min-width:260px; max-width:90vw;
+        }
+        .achiev-icon { font-size:2rem; flex-shrink:0; }
+        .achiev-t { color:#f5c518; font-weight:700; font-size:1rem; }
+        .achiev-d { color:#c9a840; font-size:.82rem; margin-top:.1rem; opacity:.85; }
+
+        @keyframes toastIn {
+          0%   { opacity:0; transform:translateX(-50%) translateY(30px) scale(.85); }
+          100% { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+        }
 
         @keyframes floatC {
           0%,100% { transform:translateY(0) rotate(-8deg); }
