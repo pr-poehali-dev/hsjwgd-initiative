@@ -5,14 +5,23 @@ const OGURCHIK_IMG = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-5
 const LUNTIK_IMG   = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/8a791d5d-298b-43b7-a662-4f7274c4516f.jpg";
 const RYG_IMG      = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/555ac2d9-15c7-4ca6-b903-7a86d2de8717.jpg";
 const MUSIC_URL    = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-const SAVE_KEY     = "moneta_save_v1";
+const SAVE_KEY     = "moneta_save_v2";
+
+const NEWS = [
+  { date: "27.04.2025", title: "Новый персонаж — Рыг!", text: "После 700 кликов на Лунтика появится Рыг — самый крутой персонаж в игре." },
+  { date: "27.04.2025", title: "Очки добавлены в магазин", text: "Купи очки за 128 монет и получай в 1.2 раза больше монет за каждый клик!" },
+  { date: "27.04.2025", title: "Раздел Новости", text: "Теперь в главном меню есть вкладка Новости — здесь ты всегда узнаешь, что добавили в игру." },
+  { date: "27.04.2025", title: "Сохранения", text: "Прогресс теперь сохраняется автоматически. Можешь закрыть вкладку и вернуться позже!" },
+  { date: "27.04.2025", title: "Раздел Ачивки", text: "За каждую покупку в магазине теперь выдаётся уникальная ачивка. Собери их все!" },
+];
 
 const SHOP_ITEMS = [
-  { id: "kastrul",  name: "Кастрюля",      price: 50,  emoji: "🪣", desc: "кастрюля.",                                                    achiev: { title: "Это не ведро!",         desc: "купи кастрюлю" } },
-  { id: "multivar", name: "Мультиварка",   price: 125, emoji: "🍲", desc: "очень полезная в готовке",                                     achiev: { title: "сам варить не умеешь?", desc: "купи мультиварку" } },
-  { id: "nozh",     name: "Нож",           price: 175, emoji: "🔪", desc: "очень опасен не только в нападении, но и при резке чего либо", achiev: { title: "ты осторожней будь!",   desc: "купи нож" } },
-  { id: "tv",       name: "Телевизор",     price: 275, emoji: "📺", desc: "всегда весело посмотреть телевизор вечером!",                  achiev: { title: "любишь залипать?",      desc: "купи телек" } },
-  { id: "ruchka",   name: "Ручка Вспыша", price: 666, emoji: "✒️", desc: "ЭКСКЛЮЗИВ!",                                                   achiev: { title: "И ЧУДО МАШИНКИ!",       desc: "купи ручку вспыша" } },
+  { id: "kastrul",  name: "Кастрюля",      price: 50,  emoji: "🪣", desc: "кастрюля.",                                                    boost: 1,   achiev: { title: "Это не ведро!",         desc: "купи кастрюлю" } },
+  { id: "ochki",    name: "Очки",          price: 128, emoji: "👓", desc: "У тебя зрение ниже нормы?",                                    boost: 1.2, achiev: { title: "Четыре глаза!",         desc: "купи очки" } },
+  { id: "multivar", name: "Мультиварка",   price: 125, emoji: "🍲", desc: "очень полезная в готовке",                                     boost: 1,   achiev: { title: "сам варить не умеешь?", desc: "купи мультиварку" } },
+  { id: "nozh",     name: "Нож",           price: 175, emoji: "🔪", desc: "очень опасен не только в нападении, но и при резке чего либо", boost: 1,   achiev: { title: "ты осторожней будь!",   desc: "купи нож" } },
+  { id: "tv",       name: "Телевизор",     price: 275, emoji: "📺", desc: "всегда весело посмотреть телевизор вечером!",                  boost: 1,   achiev: { title: "любишь залипать?",      desc: "купи телек" } },
+  { id: "ruchka",   name: "Ручка Вспыша", price: 666, emoji: "✒️", desc: "ЭКСКЛЮЗИВ!",                                                   boost: 1,   achiev: { title: "И ЧУДО МАШИНКИ!",       desc: "купи ручку вспыша" } },
 ];
 
 const ALL_ACHIEVS = SHOP_ITEMS.map((i) => ({ id: i.id, ...i.achiev, emoji: i.emoji }));
@@ -21,6 +30,8 @@ const UPGRADES = [
   { id: "click", name: "+1 монета за клик",   basePrice: 25, desc: "Каждый клик приносит больше монет" },
   { id: "auto",  name: "+1 монета в секунду", basePrice: 50, desc: "Монеты приходят автоматически" },
 ];
+
+const SPLASH_EMOJIS = ["💰","🤑","💰","🤑","💰","💰","🤑","💰","🤑","💰","💰","🤑","💰","🤑","💰","🤑","💰","💰","🤑","💰"];
 
 function getUpgradePrice(basePrice: number, level: number) {
   return Math.floor(basePrice * Math.pow(1.5, level));
@@ -33,16 +44,11 @@ function getCharacter(clicks: number) {
   return                     { img: VSPLYSH_IMG,  name: "Вспыш",   color: "#ffcc00" };
 }
 
-type Tab = "main" | "earn" | "shop" | "settings" | "achievs";
+type Tab = "main" | "earn" | "shop" | "settings" | "achievs" | "news";
 
 interface SaveData {
-  coins: number;
-  totalClicks: number;
-  charClicks: number;
-  clickLevel: number;
-  autoLevel: number;
-  purchased: string[];
-  music: boolean;
+  coins: number; totalClicks: number; charClicks: number;
+  clickLevel: number; autoLevel: number; purchased: string[]; music: boolean;
 }
 
 function loadSave(): Partial<SaveData> {
@@ -50,7 +56,49 @@ function loadSave(): Partial<SaveData> {
   catch { return {}; }
 }
 
+// ── Splash screen ──────────────────────────────────────────────
+function SplashScreen({ onDone }: { onDone: () => void }) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const start = performance.now();
+    const duration = 2800;
+    let raf: number;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      setProgress(p);
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else setTimeout(onDone, 200);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [onDone]);
+
+  return (
+    <div className="splash">
+      <div className="splash-emojis">
+        {SPLASH_EMOJIS.map((e, i) => (
+          <span key={i} className="splash-emoji" style={{
+            animationDelay: `${(i * 0.15) % 2}s`,
+            fontSize: `${2 + (i % 3) * 0.8}rem`,
+          }}>{e}</span>
+        ))}
+      </div>
+      <div className="splash-center">
+        <div className="splash-title">💰 МОНЕТНЫЙ КЛИКЕР 💰</div>
+        <div className="splash-sub">Загружаем монеты...</div>
+        <div className="splash-bar-wrap">
+          <div className="splash-bar-fill" style={{ width: `${progress * 100}%` }} />
+        </div>
+        <div className="splash-pct">{Math.round(progress * 100)}%</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main App ───────────────────────────────────────────────────
 export default function Index() {
+  const [splashDone, setSplashDone] = useState(false);
   const saved = loadSave();
 
   const [tab, setTab]               = useState<Tab>("main");
@@ -62,22 +110,22 @@ export default function Index() {
   const [purchased, setPurchased]   = useState<string[]>(saved.purchased ?? []);
   const [music, setMusic]           = useState(saved.music ?? true);
   const [clickAnim, setClickAnim]   = useState(false);
-  const [plusAnims, setPlusAnims]   = useState<{ id: number; x: number; y: number }[]>([]);
+  const [plusAnims, setPlusAnims]   = useState<{ id: number; x: number; y: number; val: number }[]>([]);
   const [toast, setToast]           = useState<{ title: string; desc: string } | null>(null);
   const audioRef  = useRef<HTMLAudioElement | null>(null);
   const animIdRef = useRef(0);
 
-  // Save to localStorage on every state change
+  const hasOchki = purchased.includes("ochki");
+  const clickBoost = hasOchki ? 1.2 : 1;
+
   useEffect(() => {
     const data: SaveData = { coins, totalClicks, charClicks, clickLevel, autoLevel, purchased, music };
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
   }, [coins, totalClicks, charClicks, clickLevel, autoLevel, purchased, music]);
 
-  // Music init
   useEffect(() => {
     const audio = new Audio(MUSIC_URL);
-    audio.loop = true;
-    audio.volume = 0.3;
+    audio.loop = true; audio.volume = 0.3;
     audioRef.current = audio;
     if (music) audio.play().catch(() => {});
     return () => { audio.pause(); };
@@ -89,7 +137,6 @@ export default function Index() {
     else audioRef.current.pause();
   }, [music]);
 
-  // Auto income
   useEffect(() => {
     if (autoLevel === 0) return;
     const iv = setInterval(() => setCoins((c) => c + autoLevel), 1000);
@@ -97,17 +144,18 @@ export default function Index() {
   }, [autoLevel]);
 
   const handleCharClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    const perClick = 1 + clickLevel;
-    setCoins((c) => c + perClick);
+    const base = 1 + clickLevel;
+    const earned = Math.round(base * clickBoost);
+    setCoins((c) => c + earned);
     setTotal((t) => t + 1);
     setCharClicks((c) => c + 1);
     setClickAnim(true);
     setTimeout(() => setClickAnim(false), 120);
     const rect = e.currentTarget.getBoundingClientRect();
     const id = animIdRef.current++;
-    setPlusAnims((a) => [...a, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
+    setPlusAnims((a) => [...a, { id, x: e.clientX - rect.left, y: e.clientY - rect.top, val: earned }]);
     setTimeout(() => setPlusAnims((a) => a.filter((p) => p.id !== id)), 800);
-  }, [clickLevel]);
+  }, [clickLevel, clickBoost]);
 
   const buyUpgrade = (id: string) => {
     const upg = UPGRADES.find((u) => u.id === id)!;
@@ -133,9 +181,11 @@ export default function Index() {
 
   const char = getCharacter(charClicks);
 
+  if (!splashDone) return <SplashScreen onDone={() => setSplashDone(true)} />;
+
   return (
     <div className="pw">
-      {/* Floating coins bg */}
+      {/* Floating coin bg */}
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
         {Array.from({ length: 35 }).map((_, i) => (
           <span key={i} style={{
@@ -150,9 +200,9 @@ export default function Index() {
         ))}
       </div>
 
-      {/* Coin counter */}
+      {/* Coin badge */}
       <div style={{ position:"fixed", top:"1rem", right:"1rem", zIndex:200 }}>
-        <span className="coin-badge">🪙 {coins.toLocaleString()}</span>
+        <span className="coin-badge">🪙 {coins.toLocaleString()}{hasOchki ? " ×1.2" : ""}</span>
       </div>
 
       {/* Achievement toast */}
@@ -177,6 +227,7 @@ export default function Index() {
               <button className="mb" onClick={() => setTab("earn")}>Заработок 🤑</button>
               <button className="mb" onClick={() => setTab("shop")}>Магазин 🛒</button>
               <button className="mb" onClick={() => setTab("achievs")}>Ачивки 🏆</button>
+              <button className="mb" onClick={() => setTab("news")}>Новости 📰</button>
               <button className="mb" onClick={() => setTab("settings")}>Настройки ⚙️</button>
             </div>
           </div>
@@ -189,8 +240,9 @@ export default function Index() {
             <div className="stats-row">
               <span>🪙 {coins.toLocaleString()}</span>
               <span>👆 {totalClicks} кликов</span>
-              <span>⚡ +{1+clickLevel}/клик</span>
+              <span>⚡ +{Math.round((1+clickLevel)*clickBoost)}/клик</span>
               {autoLevel > 0 && <span>⏱ +{autoLevel}/сек</span>}
+              {hasOchki && <span>👓 ×1.2</span>}
             </div>
 
             <div className="char-wrap">
@@ -198,7 +250,7 @@ export default function Index() {
               {charClicks < 100  && <p className="char-hint">ещё {100-charClicks} кликов до Огурчика</p>}
               {charClicks >= 100 && charClicks < 350 && <p className="char-hint">ещё {350-charClicks} кликов до Лунтика</p>}
               {charClicks >= 350 && charClicks < 700 && <p className="char-hint" style={{color:"#b266ff"}}>ещё {700-charClicks} кликов до Рыга</p>}
-              {charClicks >= 700 && <p className="char-hint" style={{color:"#ff4da6"}}>Максимальный персонаж — Рыг!</p>}
+              {charClicks >= 700 && <p className="char-hint" style={{color:"#ff4da6"}}>Максимальный персонаж — Рыг! 🎉</p>}
               <button
                 className={`char-btn${clickAnim ? " clicked" : ""}`}
                 onClick={handleCharClick}
@@ -207,7 +259,7 @@ export default function Index() {
                 <img src={char.img} alt={char.name} className="char-img" />
                 {plusAnims.map((p) => (
                   <span key={p.id} className="plus-anim" style={{ left:p.x, top:p.y }}>
-                    +{1+clickLevel}
+                    +{p.val}
                   </span>
                 ))}
               </button>
@@ -248,13 +300,16 @@ export default function Index() {
             <p className="ms" style={{ marginBottom:"1.2rem" }}>🪙 {coins.toLocaleString()} монет</p>
             <div className="items-list">
               {SHOP_ITEMS.map((item) => {
-                const bought  = purchased.includes(item.id);
-                const canBuy  = !bought && coins >= item.price;
+                const bought = purchased.includes(item.id);
+                const canBuy = !bought && coins >= item.price;
                 return (
                   <div key={item.id} className={`item-card${bought ? " bought" : ""}`}>
                     <span className="item-emoji">{item.emoji}</span>
                     <div className="item-info">
-                      <span className="item-name">{item.name}</span>
+                      <span className="item-name">
+                        {item.name}
+                        {item.boost > 1 && <span className="boost-badge"> ×{item.boost}</span>}
+                      </span>
                       <span className="item-desc">{item.desc}</span>
                     </div>
                     <button
@@ -301,6 +356,24 @@ export default function Index() {
           </div>
         )}
 
+        {/* ── NEWS ── */}
+        {tab === "news" && (
+          <div className="shop-view">
+            <button className="back-btn" onClick={() => setTab("main")}>← Назад</button>
+            <h2 className="shop-title">📰 Новости</h2>
+            <p className="ms" style={{ marginBottom:"1.2rem" }}>Последние обновления игры</p>
+            <div className="items-list">
+              {NEWS.map((n, i) => (
+                <div key={i} className="news-card">
+                  <div className="news-date">{n.date}</div>
+                  <div className="news-title">{n.title}</div>
+                  <div className="news-text">{n.text}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── SETTINGS ── */}
         {tab === "settings" && (
           <div className="settings-view">
@@ -327,12 +400,62 @@ export default function Index() {
         @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&family=Caveat:wght@700&display=swap');
         * { box-sizing: border-box; }
 
+        /* ── SPLASH ── */
+        .splash {
+          min-height:100vh; width:100%;
+          background:radial-gradient(ellipse at 50% 0%,#7a5c00,#3d2e00 50%,#1a1200);
+          display:flex; align-items:center; justify-content:center;
+          font-family:'Rubik',sans-serif; position:relative; overflow:hidden;
+        }
+        .splash-emojis {
+          position:absolute; inset:0; display:flex; flex-wrap:wrap;
+          align-content:flex-start; gap:.6rem; padding:1rem;
+          pointer-events:none; overflow:hidden;
+        }
+        .splash-emoji {
+          animation:splashFloat 2s ease-in-out infinite;
+          display:inline-block;
+        }
+        .splash-center {
+          position:relative; z-index:1; text-align:center; padding:2rem;
+        }
+        .splash-title {
+          font-family:'Caveat',cursive; font-size:2.8rem; color:#f5c518;
+          text-shadow:0 2px 20px rgba(0,0,0,.8); margin-bottom:.5rem;
+          animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .splash-sub {
+          color:#c9a840; font-size:1.1rem; margin-bottom:1.8rem; opacity:.9;
+        }
+        .splash-bar-wrap {
+          width:280px; max-width:80vw; height:18px;
+          background:rgba(0,0,0,.5); border:2px solid #c9a840;
+          border-radius:12px; overflow:hidden; margin:0 auto;
+        }
+        .splash-bar-fill {
+          height:100%; background:linear-gradient(90deg,#c9a840,#f5c518,#fff8a0,#f5c518);
+          background-size:200%;
+          animation:shimmer 1.2s linear infinite;
+          border-radius:12px; transition:width .05s linear;
+        }
+        .splash-pct {
+          color:#f5c518; font-weight:700; font-size:1.1rem; margin-top:.7rem;
+        }
+        @keyframes splashFloat {
+          0%,100% { transform:translateY(0) rotate(-5deg); }
+          50%      { transform:translateY(-12px) rotate(5deg); }
+        }
+        @keyframes shimmer {
+          0%   { background-position:0% 50%; }
+          100% { background-position:200% 50%; }
+        }
+
+        /* ── MAIN ── */
         .pw {
           min-height:100vh;
-          background:radial-gradient(ellipse at 50% 0%,#7a5c00 0%,#3d2e00 45%,#1a1200 100%);
+          background:radial-gradient(ellipse at 50% 0%,#7a5c00,#3d2e00 45%,#1a1200);
           display:flex; align-items:center; justify-content:center;
-          font-family:'Rubik',sans-serif;
-          position:relative; overflow:hidden; padding:1rem;
+          font-family:'Rubik',sans-serif; position:relative; overflow:hidden; padding:1rem;
         }
         .pc { position:relative; z-index:1; width:100%; max-width:500px; text-align:center; }
 
@@ -345,12 +468,12 @@ export default function Index() {
         .mt { font-family:'Caveat',cursive; font-size:2.5rem; color:#f5c518; margin-bottom:.3rem; text-shadow:0 2px 16px rgba(0,0,0,.7); }
         .ms { color:#c9a840; font-size:1rem; margin-bottom:2rem; opacity:.9; }
         .menu { animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both; }
-        .mbg { display:flex; flex-direction:column; gap:1rem; }
+        .mbg { display:flex; flex-direction:column; gap:.85rem; }
         .mb {
           background:linear-gradient(135deg,#7a5c00,#4a3800);
           color:#f5c518; border:2.5px solid #c9a840; border-radius:18px;
-          padding:1.1rem 1.5rem; font-family:'Rubik',sans-serif;
-          font-weight:700; font-size:1.2rem; cursor:pointer;
+          padding:1rem 1.5rem; font-family:'Rubik',sans-serif;
+          font-weight:700; font-size:1.15rem; cursor:pointer;
           transition:transform .15s,box-shadow .15s;
           box-shadow:0 4px 20px rgba(200,160,0,.3);
         }
@@ -424,6 +547,10 @@ export default function Index() {
         .item-info  { flex:1; text-align:left; }
         .item-name  { display:block; color:#f5c518; font-weight:700; font-size:1rem; }
         .item-desc  { display:block; color:#c9a840; font-size:.82rem; opacity:.85; margin-top:.2rem; }
+        .boost-badge {
+          background:#f5c518; color:#3a2a00; font-size:.72rem;
+          border-radius:8px; padding:.1rem .4rem; font-weight:900; margin-left:.4rem; vertical-align:middle;
+        }
         .buy-btn {
           background:linear-gradient(135deg,#7a5c00,#4a3800);
           color:#f5c518; border:2px solid #c9a840; border-radius:12px;
@@ -432,6 +559,15 @@ export default function Index() {
         }
         .buy-btn:hover:not(:disabled) { transform:scale(1.07); }
         .buy-btn:disabled { opacity:.45; cursor:not-allowed; }
+
+        /* ── NEWS ── */
+        .news-card {
+          background:rgba(0,0,0,.45); border:2px solid #7a5c00; border-radius:16px;
+          padding:1rem 1.2rem; text-align:left;
+        }
+        .news-date  { color:#7a5c00; font-size:.78rem; font-weight:700; margin-bottom:.25rem; }
+        .news-title { color:#f5c518; font-weight:700; font-size:1.05rem; margin-bottom:.35rem; }
+        .news-text  { color:#c9a840; font-size:.88rem; opacity:.9; line-height:1.5; }
 
         .settings-view { animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both; }
         .set-card {
