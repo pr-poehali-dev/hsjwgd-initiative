@@ -1,104 +1,122 @@
 import { useState } from "react";
 
-type ModalState =
-  | { type: "simple"; title: string; message: string; emoji: string }
-  | { type: "vspysh" }
-  | { type: "result"; correct: boolean };
+type Step =
+  | { quiz: string; step: "question" }
+  | { quiz: string; step: "result"; answer: string };
 
-const cards = [
-  { id: "gd",        emoji: "😈", question: "ГД что это?",           border: "#ff7777", glow: "rgba(255,50,50,0.35)" },
-  { id: "undertale", emoji: "❤️", question: "Андертейл что это?",    border: "#7799ff", glow: "rgba(50,100,255,0.35)" },
-  { id: "roblox",    emoji: "⭐", question: "Нулс что это?",          border: "#ffd700", glow: "rgba(255,180,0,0.35)" },
-  { id: "vspysh",    emoji: "⚡", question: "Что такое Вспыш?",       border: "#cc77ff", glow: "rgba(180,50,255,0.35)" },
+const quizzes = [
+  {
+    id: "gd",
+    label: "Тест на любителя ГД",
+    question: "Сколько уровней в ГД?",
+    answers: ["1488", "67", "666 exe"],
+    results: ["возможно.", "не знаю", "ТОМ666ЕХЕ ВЗЛОМАЛ ТЕБЯ!"],
+  },
+  {
+    id: "undertale",
+    label: "Тест на фаната Андертейл",
+    question: "Сколько лет Сансу?",
+    answers: ["6362637272653", "673836"],
+    results: ["грузовички", "огуросыш"],
+  },
+  {
+    id: "nuls",
+    label: "Тест на знание нулса",
+    question: "Нулс имба?",
+    answers: ["Да", "конечно"],
+    results: ["молодец!", "правильно!"],
+  },
+  {
+    id: "mine",
+    label: "Тест на знание майна",
+    question: "Майн имба?",
+    answers: ["да", "у у Мишка Мишка"],
+    results: ["НЕ ТАК!!!!", "ЭЭЭЭ 67 У У У МИШКА МИШКА (Правильно)"],
+  },
+  {
+    id: "kastrul",
+    label: "кастрюля",
+    question: null,
+    answers: [],
+    results: [],
+  },
 ];
 
 export default function Index() {
-  const [modal, setModal] = useState<ModalState | null>(null);
+  const [step, setStep] = useState<Step | null>(null);
 
-  function openCard(id: string) {
-    if (id === "gd")        setModal({ type: "simple", emoji: "💩", title: "ГД — это...", message: "гд понос удали его" });
-    if (id === "undertale") setModal({ type: "simple", emoji: "📉", title: "Андертейл — это...", message: "андертейл скатился, и тоже понос" });
-    if (id === "roblox")    setModal({ type: "simple", emoji: "🏆", title: "Нулс — это...", message: "нулс лучше гд и андертейл" });
-    if (id === "vspysh")    setModal({ type: "vspysh" });
+  function openQuiz(id: string) {
+    if (id === "kastrul") {
+      setStep({ quiz: "kastrul", step: "result", answer: "Кастрюля." });
+      return;
+    }
+    setStep({ quiz: id, step: "question" });
   }
+
+  function pickAnswer(quizId: string, idx: number) {
+    const q = quizzes.find((x) => x.id === quizId)!;
+    setStep({ quiz: quizId, step: "result", answer: q.results[idx] });
+  }
+
+  const currentQuiz =
+    step ? quizzes.find((x) => x.id === step.quiz)! : null;
 
   return (
     <div className="pw">
-      {/* Floating cucumbers */}
+      {/* Poop background */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-        {Array.from({ length: 22 }).map((_, i) => (
+        {Array.from({ length: 30 }).map((_, i) => (
           <span key={i} style={{
             position: "absolute",
-            left: `${(i * 41 + 3) % 96}%`,
-            top: `${(i * 57 + 8) % 92}%`,
-            animationDelay: `${(i * 0.35) % 5}s`,
-            fontSize: `${1.1 + (i % 4) * 0.55}rem`,
-            opacity: 0.15 + (i % 5) * 0.06,
-            animation: "floatC 6s ease-in-out infinite",
+            left: `${(i * 37 + 5) % 97}%`,
+            top: `${(i * 53 + 11) % 95}%`,
+            fontSize: `${1.2 + (i % 4) * 0.6}rem`,
+            opacity: 0.18 + (i % 5) * 0.05,
+            animation: `floatP ${4 + (i % 4)}s ease-in-out infinite`,
+            animationDelay: `${(i * 0.4) % 5}s`,
             userSelect: "none",
-          }}>🥒</span>
+          }}>💩</span>
         ))}
       </div>
 
       <div className="pc">
-        <h1 className="mt">🥒 ИГРОВОЙ ПОРТАЛ 🥒</h1>
-        <p className="ms">Нажми на карточку и узнай правду!</p>
+        <h1 className="mt">💩 МЕГА ТЕСТЫ 💩</h1>
+        <p className="ms">Выбери тест и докажи что ты знаешь!</p>
 
-        <div className="cg">
-          {cards.map((card) => (
-            <button key={card.id} className="gc" onClick={() => openCard(card.id)}
-              style={{ borderColor: card.border, boxShadow: `0 4px 24px ${card.glow}` }}>
-              <span style={{ fontSize: "2.6rem", animation: "wigC 2.5s ease-in-out infinite" }}>{card.emoji}</span>
-              <span className="ct">{card.question}</span>
-              <span className="ch">Нажми, чтобы узнать →</span>
+        <div className="bg">
+          {quizzes.map((q) => (
+            <button key={q.id} className="qb" onClick={() => openQuiz(q.id)}>
+              {q.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Simple modal */}
-      {modal?.type === "simple" && (
-        <div className="mo" onClick={() => setModal(null)}>
+      {/* Question modal */}
+      {step?.step === "question" && currentQuiz && (
+        <div className="mo" onClick={() => setStep(null)}>
           <div className="mb" onClick={(e) => e.stopPropagation()}>
-            <div className="me">{modal.emoji}</div>
-            <h2 className="mtt">{modal.title}</h2>
-            <p className="mm">{modal.message}</p>
-            <button className="mc" onClick={() => setModal(null)}>Закрыть ✕</button>
-          </div>
-        </div>
-      )}
-
-      {/* Vspysh modal */}
-      {modal?.type === "vspysh" && (
-        <div className="mo" onClick={() => setModal(null)}>
-          <div className="mb" onClick={(e) => e.stopPropagation()}>
-            <div className="me">⚡</div>
-            <h2 className="mtt">Вспыш — это...</h2>
-            <p className="mm" style={{ fontSize: "0.95rem", opacity: 0.8 }}>Выбери правильный ответ:</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.75rem" }}>
-              <button className="vb vbad" onClick={() => setModal({ type: "result", correct: false })}>
-                💩 вспыш это говно
-              </button>
-              <button className="vb vgood" onClick={() => setModal({ type: "result", correct: true })}>
-                👑 вспыш это имба
-              </button>
+            <div className="me">💩</div>
+            <h2 className="mtt">{currentQuiz.question}</h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+              {currentQuiz.answers.map((ans, i) => (
+                <button key={i} className="ab" onClick={() => pickAnswer(currentQuiz.id, i)}>
+                  {ans}
+                </button>
+              ))}
             </div>
+            <button className="mc" style={{ marginTop: "1.2rem" }} onClick={() => setStep(null)}>Закрыть ✕</button>
           </div>
         </div>
       )}
 
       {/* Result modal */}
-      {modal?.type === "result" && (
-        <div className="mo" onClick={() => setModal(null)}>
-          <div className="mb" style={modal.correct
-            ? { borderColor: "#44ff44", background: "linear-gradient(160deg,#074a07,#0f7a0f)" }
-            : { borderColor: "#ff4444", background: "linear-gradient(160deg,#4a0707,#7a1010)" }}
-            onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontSize: "4rem", marginBottom: "0.5rem" }}>{modal.correct ? "✅" : "❌"}</div>
-            <p style={{ fontFamily: "'Caveat',cursive", fontSize: "2.4rem", fontWeight: 700, color: "#fff", margin: "0 0 1.5rem" }}>
-              {modal.correct ? "ПРАВИЛЬНО!!" : "НЕПРАВИЛЬНО!"}
-            </p>
-            <button className="mc" onClick={() => setModal(null)}>Закрыть ✕</button>
+      {step?.step === "result" && (
+        <div className="mo" onClick={() => setStep(null)}>
+          <div className="mb" onClick={(e) => e.stopPropagation()}>
+            <div className="me">💩</div>
+            <p className="mm">{step.answer}</p>
+            <button className="mc" onClick={() => setStep(null)}>Закрыть ✕</button>
           </div>
         </div>
       )}
@@ -108,93 +126,79 @@ export default function Index() {
 
         .pw {
           min-height: 100vh;
-          background: linear-gradient(135deg, #145214 0%, #1f8c1f 40%, #28c228 70%, #166816 100%);
+          background: radial-gradient(ellipse at center, #5c3a1e 0%, #3b1f0a 50%, #1a0a00 100%);
           display: flex; align-items: center; justify-content: center;
           font-family: 'Rubik', sans-serif;
           position: relative; overflow: hidden; padding: 2rem 1rem;
         }
-        .pc { position: relative; z-index: 1; width: 100%; max-width: 640px; text-align: center; }
+        .pc { position: relative; z-index: 1; width: 100%; max-width: 480px; text-align: center; }
         .mt {
-          font-family: 'Caveat', cursive; font-size: 2.4rem; font-weight: 700;
-          color: #ccffcc; margin-bottom: 0.4rem;
-          text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+          font-family: 'Caveat', cursive; font-size: 2.6rem; font-weight: 700;
+          color: #ffe0a0; margin-bottom: 0.4rem;
+          text-shadow: 0 2px 16px rgba(0,0,0,0.7);
           animation: popIn .5s cubic-bezier(.34,1.56,.64,1) both;
         }
-        .ms { color: #a8ffb0; font-size: 1rem; margin-bottom: 2rem; opacity: .85; animation: popIn .5s .1s cubic-bezier(.34,1.56,.64,1) both; }
-        .cg { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        @media(max-width:480px){ .cg { grid-template-columns: 1fr; } }
-        .gc {
-          background: rgba(0,50,0,.72); backdrop-filter: blur(10px);
-          border: 2.5px solid transparent; border-radius: 20px;
-          padding: 1.6rem 1rem; cursor: pointer;
-          display: flex; flex-direction: column; align-items: center; gap: .5rem;
-          transition: transform .18s, box-shadow .18s;
-          animation: popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+        .ms { color: #d4a96a; font-size: 1rem; margin-bottom: 2rem; opacity: .9; }
+        .bg { display: flex; flex-direction: column; gap: 1rem; }
+        .qb {
+          background: linear-gradient(135deg, #7a4010, #4a2208);
+          color: #ffe0a0; border: 2.5px solid #c07030;
+          border-radius: 16px; padding: 1.1rem 1.5rem;
+          font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1.1rem;
+          cursor: pointer; transition: transform .15s, box-shadow .15s;
+          box-shadow: 0 4px 18px rgba(180,80,0,.35);
         }
-        .gc:hover { transform: translateY(-6px) scale(1.04); }
-        .gc:active { transform: scale(.97); }
-        .ct { font-weight: 700; font-size: 1.05rem; color: #e8ffe8; line-height: 1.3; }
-        .ch { font-size: .75rem; color: #7dff7d; opacity: .7; }
+        .qb:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 8px 28px rgba(180,80,0,.55); }
+        .qb:active { transform: scale(.97); }
 
         .mo {
           position: fixed; inset: 0;
-          background: rgba(0,30,0,.78); backdrop-filter: blur(7px);
+          background: rgba(20,8,0,.82); backdrop-filter: blur(7px);
           display: flex; align-items: center; justify-content: center;
           z-index: 100; animation: fadeIn .2s ease both; padding: 1rem;
         }
         .mb {
-          background: linear-gradient(160deg, #0b4a0b, #1b701b);
-          border: 3px solid #7fff7f; border-radius: 24px;
-          padding: 2.5rem 1.8rem; max-width: 360px; width: 100%;
+          background: linear-gradient(160deg, #4a2208, #7a3810);
+          border: 3px solid #c07030; border-radius: 24px;
+          padding: 2.5rem 1.8rem; max-width: 380px; width: 100%;
           text-align: center;
-          box-shadow: 0 0 60px rgba(0,255,60,.3), 0 16px 48px rgba(0,0,0,.6);
+          box-shadow: 0 0 60px rgba(200,100,0,.3), 0 16px 48px rgba(0,0,0,.7);
           animation: popIn .3s cubic-bezier(.34,1.56,.64,1) both;
         }
-        .me { font-size: 3.5rem; margin-bottom: .75rem; animation: wigC .5s ease; }
-        .mtt { font-family: 'Caveat', cursive; font-size: 1.5rem; color: #ccffcc; margin-bottom: .6rem; }
-        .mm { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 1.5rem; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+        .me { font-size: 3.5rem; margin-bottom: .75rem; }
+        .mtt {
+          font-family: 'Caveat', cursive; font-size: 1.7rem; font-weight: 700;
+          color: #ffe0a0; margin-bottom: .6rem;
+        }
+        .mm { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 1.5rem; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
         .mc {
-          background: linear-gradient(135deg, #33cc33, #1a8a1a);
-          color: #fff; border: 2px solid #7fff7f; border-radius: 12px;
+          background: linear-gradient(135deg, #c07030, #7a4010);
+          color: #fff; border: 2px solid #e09050; border-radius: 12px;
           padding: .65rem 1.5rem; font-family: 'Rubik', sans-serif;
           font-weight: 700; font-size: .95rem; cursor: pointer;
-          transition: transform .15s; box-shadow: 0 4px 14px rgba(50,200,50,.35);
+          transition: transform .15s; box-shadow: 0 4px 14px rgba(180,80,0,.35);
         }
         .mc:hover { transform: scale(1.06); }
-
-        .vb {
-          padding: .9rem 1.2rem; border-radius: 14px;
+        .ab {
+          background: linear-gradient(135deg, #3b1f0a, #5c3010);
+          color: #ffe0a0; border: 2px solid #a06030;
+          border-radius: 12px; padding: .85rem 1.2rem;
           font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1rem;
-          cursor: pointer; border: 2.5px solid transparent;
-          transition: transform .15s;
+          cursor: pointer; transition: transform .15s, background .15s;
         }
-        .vb:hover { transform: scale(1.05); }
-        .vb:active { transform: scale(.97); }
-        .vbad {
-          background: linear-gradient(135deg, #cc2222, #881111);
-          color: #fff; border-color: #ff6666;
-          box-shadow: 0 4px 16px rgba(200,30,30,.4);
-        }
-        .vgood {
-          background: linear-gradient(135deg, #ffcc00, #ff8800);
-          color: #2a1500; border-color: #ffe066;
-          box-shadow: 0 4px 16px rgba(255,160,0,.4);
-        }
+        .ab:hover { background: linear-gradient(135deg, #7a4010, #a05020); transform: scale(1.04); }
+        .ab:active { transform: scale(.97); }
 
+        @keyframes floatP {
+          0%, 100% { transform: translateY(0) rotate(-5deg); }
+          50% { transform: translateY(-18px) rotate(5deg); }
+        }
         @keyframes popIn {
-          from { transform: scale(.7); opacity: 0; }
-          to   { transform: scale(1);  opacity: 1; }
+          0% { opacity: 0; transform: scale(.7); }
+          100% { opacity: 1; transform: scale(1); }
         }
         @keyframes fadeIn {
           from { opacity: 0; } to { opacity: 1; }
-        }
-        @keyframes floatC {
-          0%,100% { transform: translateY(0) rotate(-10deg); }
-          50%     { transform: translateY(-20px) rotate(12deg); }
-        }
-        @keyframes wigC {
-          0%,100% { transform: rotate(-5deg); }
-          50%     { transform: rotate(5deg); }
         }
       `}</style>
     </div>
