@@ -55,7 +55,6 @@ const UPGRADES = [
   { id: "auto",  name: "+1 монета в секунду", basePrice: 50, desc: "Монеты приходят автоматически" },
 ];
 
-const SPLASH_EMOJIS = ["💰","🤑","💰","🤑","💰","💰","🤑","💰","🤑","💰","💰","🤑","💰","🤑","💰","🤑","💰","💰","🤑","💰"];
 
 function getUpgradePrice(basePrice: number, level: number) {
   return Math.floor(basePrice * Math.pow(1.5, level));
@@ -80,49 +79,8 @@ function loadSave(): Partial<SaveData> {
   catch { return {}; }
 }
 
-// ── Splash screen ──────────────────────────────────────────────
-function SplashScreen({ onDone }: { onDone: () => void }) {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const start = performance.now();
-    const duration = 2800;
-    let raf: number;
-    const tick = (now: number) => {
-      const p = Math.min((now - start) / duration, 1);
-      setProgress(p);
-      if (p < 1) raf = requestAnimationFrame(tick);
-      else setTimeout(onDone, 200);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [onDone]);
-
-  return (
-    <div className="splash">
-      <div className="splash-emojis">
-        {SPLASH_EMOJIS.map((e, i) => (
-          <span key={i} className="splash-emoji" style={{
-            animationDelay: `${(i * 0.15) % 2}s`,
-            fontSize: `${2 + (i % 3) * 0.8}rem`,
-          }}>{e}</span>
-        ))}
-      </div>
-      <div className="splash-center">
-        <div className="splash-title">💰 МОНЕТНЫЙ КЛИКЕР 💰</div>
-        <div className="splash-sub">Загружаем монеты...</div>
-        <div className="splash-bar-wrap">
-          <div className="splash-bar-fill" style={{ width: `${progress * 100}%` }} />
-        </div>
-        <div className="splash-pct">{Math.round(progress * 100)}%</div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main App ───────────────────────────────────────────────────
 export default function Index() {
-  const [splashDone, setSplashDone] = useState(false);
   const saved = loadSave();
 
   const [tab, setTab]               = useState<Tab>("main");
@@ -226,8 +184,6 @@ export default function Index() {
   };
 
   const char = getCharacter(charClicks);
-
-  if (!splashDone) return <SplashScreen onDone={() => setSplashDone(true)} />;
 
   return (
     <div className="pw">
@@ -453,56 +409,6 @@ export default function Index() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&family=Caveat:wght@700&display=swap');
         * { box-sizing: border-box; }
-
-        /* ── SPLASH ── */
-        .splash {
-          min-height:100vh; width:100%;
-          background:radial-gradient(ellipse at 50% 0%,#7a5c00,#3d2e00 50%,#1a1200);
-          display:flex; align-items:center; justify-content:center;
-          font-family:'Rubik',sans-serif; position:relative; overflow:hidden;
-        }
-        .splash-emojis {
-          position:absolute; inset:0; display:flex; flex-wrap:wrap;
-          align-content:flex-start; gap:.6rem; padding:1rem;
-          pointer-events:none; overflow:hidden;
-        }
-        .splash-emoji {
-          animation:splashFloat 2s ease-in-out infinite;
-          display:inline-block;
-        }
-        .splash-center {
-          position:relative; z-index:1; text-align:center; padding:2rem;
-        }
-        .splash-title {
-          font-family:'Caveat',cursive; font-size:2.8rem; color:#f5c518;
-          text-shadow:0 2px 20px rgba(0,0,0,.8); margin-bottom:.5rem;
-          animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both;
-        }
-        .splash-sub {
-          color:#c9a840; font-size:1.1rem; margin-bottom:1.8rem; opacity:.9;
-        }
-        .splash-bar-wrap {
-          width:280px; max-width:80vw; height:18px;
-          background:rgba(0,0,0,.5); border:2px solid #c9a840;
-          border-radius:12px; overflow:hidden; margin:0 auto;
-        }
-        .splash-bar-fill {
-          height:100%; background:linear-gradient(90deg,#c9a840,#f5c518,#fff8a0,#f5c518);
-          background-size:200%;
-          animation:shimmer 1.2s linear infinite;
-          border-radius:12px; transition:width .05s linear;
-        }
-        .splash-pct {
-          color:#f5c518; font-weight:700; font-size:1.1rem; margin-top:.7rem;
-        }
-        @keyframes splashFloat {
-          0%,100% { transform:translateY(0) rotate(-5deg); }
-          50%      { transform:translateY(-12px) rotate(5deg); }
-        }
-        @keyframes shimmer {
-          0%   { background-position:0% 50%; }
-          100% { background-position:200% 50%; }
-        }
 
         /* ── MAIN ── */
         .pw {
