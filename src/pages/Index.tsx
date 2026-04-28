@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const VSPLYSH_IMG  = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/8955bc32-c510-4e9d-92f8-53d515e173de.jpg";
+const VSPLYSH_IMG  = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/bucket/268c63a7-844f-4145-9654-24a9e96d74c9.jpg";
 const OGURCHIK_IMG = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/ff26489d-9175-4142-8e78-4e7543885ec9.jpg";
 const LUNTIK_IMG   = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/8a791d5d-298b-43b7-a662-4f7274c4516f.jpg";
 const RYG_IMG      = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/555ac2d9-15c7-4ca6-b903-7a86d2de8717.jpg";
