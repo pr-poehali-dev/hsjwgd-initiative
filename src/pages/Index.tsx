@@ -5,9 +5,12 @@ const OGURCHIK_IMG = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-5
 const LUNTIK_IMG   = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/8a791d5d-298b-43b7-a662-4f7274c4516f.jpg";
 const RYG_IMG      = "https://cdn.poehali.dev/projects/e87ddbd1-cd5c-4ae2-9444-587f5752c268/files/555ac2d9-15c7-4ca6-b903-7a86d2de8717.jpg";
 const MUSIC_URL    = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-const SAVE_KEY     = "moneta_save_v2";
+const SAVE_KEY     = "moneta_save_v3";
+const RESTOCK_MS   = 3 * 60 * 1000; // 3 минуты
 
 const NEWS = [
+  { date: "28.04.2025", title: "Ресток в магазине!", text: "Каждые 3 минуты в магазине появляются 3 новых случайных предмета. Следи за таймером!" },
+  { date: "28.04.2025", title: "Новый предмет — Унитаз!", text: "Скибиди доп доп — теперь унитаз можно купить в магазине во время рестока." },
   { date: "27.04.2025", title: "Новый персонаж — Рыг!", text: "После 700 кликов на Лунтика появится Рыг — самый крутой персонаж в игре." },
   { date: "27.04.2025", title: "Очки добавлены в магазин", text: "Купи очки за 128 монет и получай в 1.2 раза больше монет за каждый клик!" },
   { date: "27.04.2025", title: "Раздел Новости", text: "Теперь в главном меню есть вкладка Новости — здесь ты всегда узнаешь, что добавили в игру." },
@@ -22,9 +25,30 @@ const SHOP_ITEMS = [
   { id: "nozh",     name: "Нож",           price: 175, emoji: "🔪", desc: "очень опасен не только в нападении, но и при резке чего либо", boost: 1,   achiev: { title: "ты осторожней будь!",   desc: "купи нож" } },
   { id: "tv",       name: "Телевизор",     price: 275, emoji: "📺", desc: "всегда весело посмотреть телевизор вечером!",                  boost: 1,   achiev: { title: "любишь залипать?",      desc: "купи телек" } },
   { id: "ruchka",   name: "Ручка Вспыша", price: 666, emoji: "✒️", desc: "ЭКСКЛЮЗИВ!",                                                   boost: 1,   achiev: { title: "И ЧУДО МАШИНКИ!",       desc: "купи ручку вспыша" } },
+  { id: "unitaz",   name: "Унитаз",        price: 99,  emoji: "🚽", desc: "Скибиди доп доп",                                              boost: 1,   achiev: { title: "*звуки смыва*",          desc: "купи унитаз" } },
 ];
 
 const ALL_ACHIEVS = SHOP_ITEMS.map((i) => ({ id: i.id, ...i.achiev, emoji: i.emoji }));
+
+// Перемешать массив (Fisher-Yates) детерминированно по seed
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const a = [...arr];
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    const j = Math.abs(s) % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getRestockSlot(epochMs: number): number {
+  return Math.floor(epochMs / RESTOCK_MS);
+}
+
+function getRestockItems(slot: number): typeof SHOP_ITEMS {
+  return seededShuffle(SHOP_ITEMS, slot).slice(0, 3);
+}
 
 const UPGRADES = [
   { id: "click", name: "+1 монета за клик",   basePrice: 25, desc: "Каждый клик приносит больше монет" },
@@ -112,8 +136,12 @@ export default function Index() {
   const [clickAnim, setClickAnim]   = useState(false);
   const [plusAnims, setPlusAnims]   = useState<{ id: number; x: number; y: number; val: number }[]>([]);
   const [toast, setToast]           = useState<{ title: string; desc: string } | null>(null);
+  const [restockSlot, setRestockSlot] = useState(() => getRestockSlot(Date.now()));
+  const [restockSec, setRestockSec]   = useState(0);
   const audioRef  = useRef<HTMLAudioElement | null>(null);
   const animIdRef = useRef(0);
+
+  const restockItems = getRestockItems(restockSlot);
 
   const hasOchki = purchased.includes("ochki");
   const clickBoost = hasOchki ? 1.2 : 1;
@@ -142,6 +170,18 @@ export default function Index() {
     const iv = setInterval(() => setCoins((c) => c + autoLevel), 1000);
     return () => clearInterval(iv);
   }, [autoLevel]);
+
+  // Restock timer
+  useEffect(() => {
+    const iv = setInterval(() => {
+      const now = Date.now();
+      const slot = getRestockSlot(now);
+      setRestockSlot(slot);
+      const msLeft = RESTOCK_MS - (now % RESTOCK_MS);
+      setRestockSec(Math.ceil(msLeft / 1000));
+    }, 1000);
+    return () => clearInterval(iv);
+  }, []);
 
   const handleCharClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const base = 1 + clickLevel;
@@ -297,9 +337,17 @@ export default function Index() {
           <div className="shop-view">
             <button className="back-btn" onClick={() => setTab("main")}>← Назад</button>
             <h2 className="shop-title">🛒 Магазин</h2>
-            <p className="ms" style={{ marginBottom:"1.2rem" }}>🪙 {coins.toLocaleString()} монет</p>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"1rem", flexWrap:"wrap", gap:".5rem" }}>
+              <span style={{ color:"#c9a840", fontSize:".95rem" }}>🪙 {coins.toLocaleString()} монет</span>
+              <span className="restock-timer">
+                🔄 Ресток через {Math.floor(restockSec/60)}:{String(restockSec%60).padStart(2,"0")}
+              </span>
+            </div>
+            <p style={{ color:"#7a5c00", fontSize:".8rem", marginBottom:"1rem", textAlign:"center" }}>
+              Сейчас в продаже 3 предмета. Каждые 3 минуты — новые!
+            </p>
             <div className="items-list">
-              {SHOP_ITEMS.map((item) => {
+              {restockItems.map((item) => {
                 const bought = purchased.includes(item.id);
                 const canBuy = !bought && coins >= item.price;
                 return (
@@ -582,6 +630,17 @@ export default function Index() {
         .toggle-btn.on  { background:#2a5a2a; color:#44ff44; border-color:#44ff44; }
         .toggle-btn.off { background:#5a1a1a; color:#ff6666; border-color:#ff6666; }
         .toggle-btn:hover { transform:scale(1.06); }
+
+        .restock-timer {
+          background:rgba(0,0,0,.5); border:2px solid #f5c518;
+          border-radius:12px; padding:.35rem .85rem;
+          color:#f5c518; font-weight:700; font-size:.9rem;
+          animation:pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+          0%,100% { box-shadow:0 0 0 0 rgba(245,197,24,.4); }
+          50%      { box-shadow:0 0 10px 4px rgba(245,197,24,.25); }
+        }
 
         .achiev-toast {
           position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%);
