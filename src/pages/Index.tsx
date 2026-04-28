@@ -176,7 +176,13 @@ export default function Index() {
     const iv = setInterval(() => {
       const now = Date.now();
       const slot = getRestockSlot(now);
-      setRestockSlot(slot);
+      setRestockSlot((prev) => {
+        if (prev !== slot) {
+          setToast({ title: "🔄 Ресток в магазине!", desc: "Появились 3 новых предмета — загляни!" });
+          setTimeout(() => setToast(null), 4000);
+        }
+        return slot;
+      });
       const msLeft = RESTOCK_MS - (now % RESTOCK_MS);
       setRestockSec(Math.ceil(msLeft / 1000));
     }, 1000);
